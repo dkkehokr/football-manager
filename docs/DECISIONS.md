@@ -117,3 +117,11 @@ Modules (built-in, plain scoped CSS).
 **Choice**: Tailwind CSS.
 **Why**: Fast to iterate, fully cross-browser, and a large ecosystem. No prebuilt components means
 we style the custom manager UI ourselves — good for learning and flexible for a bespoke game look.
+
+---
+
+**2026-09-25** — Hosting via GitHub Pages instead of AWS CDK
+**Context**: The walking skeleton now builds and runs; we needed to host the built app. Earlier planning framed hosting as AWS CDK + S3/CloudFront, owned by the infra-deploy agent.
+**Options considered**: AWS CDK static hosting (S3 + CloudFront) as originally planned vs GitHub Pages via a GitHub Actions workflow.
+**Choice**: GitHub Pages, deployed by a GitHub Actions workflow (.github/workflows/deploy-pages.yml) on push to main. The repo is public at github.com/dkkehokr/football-manager (personal account); the site serves at https://dkkehokr.github.io/football-manager/. Vite base is set to /football-manager/ for the project-pages subpath. CI is pinned to Node 24 (current Active LTS) via node-version-file reading .node-version, because Vite 8 / rolldown requires Node >= 22.12.
+**Why**: For a local-only, no-backend learning project, GitHub Pages is free, zero-infrastructure, and needs nothing beyond a single workflow file. AWS CDK/S3/CloudFront would be real infrastructure for no benefit at this stage. This does not close the door on AWS — the infra-deploy agent and the AWS path remain available, and we can move to AWS in future if the game outgrows static GitHub Pages hosting.
