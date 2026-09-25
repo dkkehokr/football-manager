@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { GameState, Result, SaveSummary } from '../game'
 import { deleteGame, listSaves, loadGame, renameSave, setFavorite, setManagerName } from '../game'
-import { formatTimestamp } from '../format'
+import { formatTimestamp } from '../utils/format'
 import ConfirmModal from './ConfirmModal'
 import TextPromptModal from './TextPromptModal'
 
