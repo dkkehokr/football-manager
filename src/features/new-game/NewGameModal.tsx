@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import type { GameState } from '../game'
-import { startNewGame } from '../game'
-import Modal from './Modal'
+import type { GameState } from '../../game'
+import { startNewGame } from '../../game'
+import Modal from '../../shared/components/Modal'
 
 interface NewGameModalProps {
   onClose: () => void

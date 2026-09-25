@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import NewGameModal from './components/NewGameModal'
-import SavesScreen from './components/SavesScreen'
+import NewGameModal from './features/new-game/NewGameModal'
+import SavesScreen from './features/saves/SavesScreen'
 import type { GameState } from './game'
 
 type Screen = 'title' | 'saves'
