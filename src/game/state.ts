@@ -10,6 +10,9 @@ export interface GameState {
   version: number
   id: string
   managerName: string
+  /** Optional player-chosen save title. When unset, the manager name is shown instead. */
+  label?: string
+  favorite: boolean
   createdAt: number
   updatedAt: number
   world: GameWorld
@@ -18,6 +21,8 @@ export interface GameState {
 export interface SaveSummary {
   id: string
   managerName: string
+  label?: string
+  favorite: boolean
   createdAt: number
   updatedAt: number
   version: number

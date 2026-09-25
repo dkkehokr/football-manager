@@ -1,13 +1,33 @@
 import { useState } from 'react'
 import NewGameModal from './components/NewGameModal'
+import SavesScreen from './components/SavesScreen'
 import type { GameState } from './game'
+
+type Screen = 'title' | 'saves'
 
 function App() {
   const [isNewGameOpen, setIsNewGameOpen] = useState(false)
   const [activeSave, setActiveSave] = useState<GameState | null>(null)
+  const [screen, setScreen] = useState<Screen>('title')
 
   const handleNewGame = () => {
     setIsNewGameOpen(true)
+  }
+
+  if (screen === 'saves') {
+    return (
+      <SavesScreen
+        onBack={() => setScreen('title')}
+        onSwitchTo={(state) => {
+          setActiveSave(state)
+          setScreen('title')
+        }}
+        activeSaveId={activeSave?.id}
+        onActiveDeleted={(id) => {
+          if (activeSave?.id === id) setActiveSave(null)
+        }}
+      />
+    )
   }
 
   return (
@@ -25,17 +45,26 @@ function App() {
         </p>
       </div>
 
-      <button
-        type="button"
-        onClick={handleNewGame}
-        className="mt-10 rounded-full bg-emerald-500 px-10 py-3 text-lg font-semibold text-slate-950 transition-colors hover:bg-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
-      >
-        New Game
-      </button>
+      <div className="mt-10 flex items-center gap-4">
+        <button
+          type="button"
+          onClick={handleNewGame}
+          className="rounded-full bg-emerald-500 px-10 py-3 text-lg font-semibold text-slate-950 transition-colors hover:bg-emerald-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+        >
+          New Game
+        </button>
+        <button
+          type="button"
+          onClick={() => setScreen('saves')}
+          className="rounded-full border border-slate-700 px-10 py-3 text-lg font-semibold text-slate-200 transition-colors hover:border-slate-500 hover:text-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+        >
+          Load Game
+        </button>
+      </div>
 
       {activeSave && (
         <p className="mt-4 text-sm text-emerald-300">
-          Welcome, {activeSave.managerName}. Save created.
+          Welcome back, {activeSave.label ?? activeSave.managerName}.
         </p>
       )}
 
