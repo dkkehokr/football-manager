@@ -10,7 +10,7 @@ function App() {
           Football Management Sim
         </span>
         <h1 className="text-6xl font-black tracking-tight sm:text-7xl">
-          GAFFER
+          MATCHDAY
         </h1>
         <p className="max-w-md text-base text-slate-400 sm:text-lg">
           Every legend needs a dugout. Build your squad, call the shots, and
