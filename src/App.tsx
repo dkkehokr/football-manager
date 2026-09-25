@@ -1,6 +1,13 @@
+import { useState } from 'react'
+import NewGameModal from './components/NewGameModal'
+import type { GameState } from './game'
+
 function App() {
+  const [isNewGameOpen, setIsNewGameOpen] = useState(false)
+  const [activeSave, setActiveSave] = useState<GameState | null>(null)
+
   const handleNewGame = () => {
-    console.log('New Game clicked - game logic not implemented yet')
+    setIsNewGameOpen(true)
   }
 
   return (
@@ -25,6 +32,22 @@ function App() {
       >
         New Game
       </button>
+
+      {activeSave && (
+        <p className="mt-4 text-sm text-emerald-300">
+          Welcome, {activeSave.managerName}. Save created.
+        </p>
+      )}
+
+      {isNewGameOpen && (
+        <NewGameModal
+          onClose={() => setIsNewGameOpen(false)}
+          onCreated={(state) => {
+            setActiveSave(state)
+            setIsNewGameOpen(false)
+          }}
+        />
+      )}
 
       <footer className="absolute bottom-6 text-xs text-slate-600">
         Pre-alpha - walking skeleton
