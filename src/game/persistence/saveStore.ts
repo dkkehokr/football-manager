@@ -21,6 +21,8 @@ function toSummary(state: GameState): SaveSummary {
   return {
     id: state.id,
     managerName: state.managerName,
+    label: state.label,
+    favorite: state.favorite,
     createdAt: state.createdAt,
     updatedAt: state.updatedAt,
     version: state.version,
@@ -34,17 +36,22 @@ export function createGameState(input: NewGameInput): GameState {
     version: GAME_STATE_VERSION,
     id: newId(),
     managerName: input.managerName.trim(),
+    favorite: false,
     createdAt: now,
     updatedAt: now,
     world: {},
   }
 }
 
-/** List all save summaries from the index, treating a missing index as empty. */
+/**
+ * List all save summaries from the index, treating a missing index as empty.
+ * `favorite` is coalesced so saves written before the field existed read as not-favorited.
+ */
 export function listSaves(): Result<SaveSummary[]> {
   const result = readJson<SaveSummary[]>(INDEX_KEY)
   if (!result.ok) return result
-  return { ok: true, value: result.value ?? [] }
+  const summaries = (result.value ?? []).map((s) => ({ ...s, favorite: s.favorite ?? false }))
+  return { ok: true, value: summaries }
 }
 
 /** Insert or replace a save's summary in the index. */
@@ -71,9 +78,16 @@ export function startNewGame(input: NewGameInput): Result<GameState> {
   return saveGame(createGameState(input))
 }
 
-/** Load a full save by id. ok(null) when no save exists for that id. */
+/**
+ * Load a full save by id. ok(null) when no save exists for that id.
+ * `favorite` is coalesced so saves written before the field existed load as not-favorited.
+ */
 export function loadGame(id: string): Result<GameState | null> {
-  return readJson<GameState>(saveKey(id))
+  const result = readJson<GameState>(saveKey(id))
+  if (!result.ok) return result
+  const state = result.value
+  if (state === null) return { ok: true, value: null }
+  return { ok: true, value: { ...state, favorite: state.favorite ?? false } }
 }
 
 /** Delete a save's entry and remove it from the index. */
@@ -83,4 +97,34 @@ export function deleteGame(id: string): Result<void> {
   const listed = listSaves()
   if (!listed.ok) return listed
   return writeJson(INDEX_KEY, listed.value.filter((s) => s.id !== id))
+}
+
+/**
+ * Load a save, apply a mutation, and persist it (restamping updatedAt via saveGame).
+ * ok(null) when no save exists for that id; storage failures propagate.
+ */
+function mutateSave(
+  id: string,
+  mutator: (state: GameState) => GameState,
+): Result<GameState | null> {
+  const loaded = loadGame(id)
+  if (!loaded.ok) return loaded
+  if (loaded.value === null) return { ok: true, value: null }
+  return saveGame(mutator(loaded.value))
+}
+
+/** Set a save's label (its display title). An empty/blank value clears it back to undefined. */
+export function renameSave(id: string, label: string): Result<GameState | null> {
+  const trimmed = label.trim()
+  return mutateSave(id, (state) => ({ ...state, label: trimmed === '' ? undefined : trimmed }))
+}
+
+/** Update the manager name on a save. */
+export function setManagerName(id: string, managerName: string): Result<GameState | null> {
+  return mutateSave(id, (state) => ({ ...state, managerName: managerName.trim() }))
+}
+
+/** Toggle/set a save's favorite flag. */
+export function setFavorite(id: string, favorite: boolean): Result<GameState | null> {
+  return mutateSave(id, (state) => ({ ...state, favorite }))
 }
