@@ -10,16 +10,21 @@ export type Result<T> =
   | { ok: true; value: T }
   | { ok: false; error: StorageFailure }
 
+/** Wrap a successful value in a Result. */
 function ok<T>(value: T): Result<T> {
   return { ok: true, value }
 }
 
+/** Build a failed Result carrying a typed failure kind, message, and optional cause. */
 function fail(kind: StorageFailureKind, message: string, cause?: unknown): Result<never> {
   return { ok: false, error: { kind, message, cause } }
 }
 
-// Touching localStorage can itself throw (private mode, disabled storage, or a non-browser
-// host), so access is guarded rather than assuming the global exists and is usable.
+/**
+ * Safely obtain the localStorage handle, or null when it is missing or unusable.
+ * Touching localStorage can itself throw (private mode, disabled storage, or a
+ * non-browser host), so access is guarded rather than assuming the global exists.
+ */
 function getStore(): Storage | null {
   try {
     if (typeof localStorage === 'undefined') return null
@@ -29,6 +34,7 @@ function getStore(): Storage | null {
   }
 }
 
+/** Read and JSON-parse the value at `key`. ok(null) when absent; 'corrupt' when unparseable. */
 export function readJson<T>(key: string): Result<T | null> {
   const store = getStore()
   if (!store) return fail('unavailable', 'localStorage is not available')
@@ -46,6 +52,7 @@ export function readJson<T>(key: string): Result<T | null> {
   }
 }
 
+/** JSON-serialize `value` and write it at `key`. Fails 'write-failed' on serialize/quota errors. */
 export function writeJson<T>(key: string, value: T): Result<void> {
   const store = getStore()
   if (!store) return fail('unavailable', 'localStorage is not available')
@@ -63,6 +70,7 @@ export function writeJson<T>(key: string, value: T): Result<void> {
   }
 }
 
+/** Remove the entry at `key`. */
 export function removeKey(key: string): Result<void> {
   const store = getStore()
   if (!store) return fail('unavailable', 'localStorage is not available')
